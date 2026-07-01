@@ -12,6 +12,9 @@ dentro de cada recurso.
 - Swagger habilitado en `/docs`.
 - Prefijo global de API en `/api`.
 - Health check operativo en `/api/health`.
+- Auth API con Supabase como proveedor de autenticacion externo.
+- Proveedores OAuth permitidos: Google y Apple.
+- Endpoint de eliminacion de cuenta para cumplimiento de proteccion de datos.
 - Base de roles con `Role`, `@Roles(...)` y `RolesGuard`.
 - Validacion de variables de entorno sin exponer secretos.
 - Tests unitarios para configuracion, roles y health checks.
@@ -96,6 +99,7 @@ APP_URL=http://localhost:3000
 SUPABASE_URL=
 SUPABASE_PUBLISHABLE_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_AUTH_PROVIDERS=google,apple
 
 JWT_SECRET=
 JWT_EXPIRES_IN=15m
@@ -150,6 +154,58 @@ El health check verifica:
 
 La respuesta no expone secretos.
 
+## Autenticacion
+
+La autenticacion la gestiona Supabase Auth. NestJS no almacena passwords, no
+crea sesiones propias y no emite JWTs de usuario.
+
+Flujo previsto:
+
+```txt
+Frontend Ionic/Angular
+  -> supabase.auth.signInWithOAuth({ provider: 'google' | 'apple' })
+  -> envia Authorization: Bearer <supabase_access_token>
+
+Backend NestJS
+  -> valida el token con Supabase Auth
+  -> normaliza el usuario actual
+  -> aplica guards y roles
+```
+
+Endpoints actuales:
+
+```txt
+GET    /api/auth/providers
+GET    /api/auth/me
+DELETE /api/auth/me
+```
+
+`GET /api/auth/providers` devuelve solo los proveedores permitidos por el
+producto. Actualmente:
+
+```txt
+google
+apple
+```
+
+`GET /api/auth/me` requiere bearer token de Supabase y devuelve una version
+segura del usuario autenticado.
+
+`DELETE /api/auth/me` elimina la cuenta usando el cliente admin de Supabase en
+backend. El frontend debe cerrar sesion inmediatamente despues, porque los JWT
+ya emitidos pueden seguir siendo validos hasta que expiren.
+
+## Proteccion de datos
+
+El producto debe permitir la eliminacion de cuenta desde la app. Para soportarlo:
+
+- `SUPABASE_SERVICE_ROLE_KEY` solo puede existir en backend.
+- Las tablas propias que referencien usuarios deben usar
+  `references auth.users(id) on delete cascade` cuando aplique.
+- Las tablas expuestas deben tener RLS habilitado.
+- No se deben usar datos de `user_metadata` para autorizacion.
+- Los roles deben venir de `app_metadata` o de tablas controladas por backend.
+
 ## Roles
 
 Roles iniciales:
@@ -198,12 +254,11 @@ npm run test -- --runInBand
 npm run test:e2e -- --runInBand
 ```
 
-Resultado actual: build correcto, 9 tests unitarios pasando y 1 test e2e
+Resultado actual: build correcto, tests unitarios pasando y 1 test e2e
 pasando.
 
 ## Pendientes inmediatos
 
-- Implementar `auth` con Supabase JWT y roles reales.
 - Crear migraciones Supabase con RLS.
 - Implementar cuotas guest/user/paid.
 - Implementar Stripe checkout y webhook.

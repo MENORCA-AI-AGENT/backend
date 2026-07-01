@@ -37,6 +37,11 @@ export class EnvironmentDto {
   @IsString()
   SUPABASE_SERVICE_ROLE_KEY?: string;
 
+  @ApiPropertyOptional({ example: 'google,apple' })
+  @IsOptional()
+  @IsString()
+  SUPABASE_AUTH_PROVIDERS?: string;
+
   @ApiPropertyOptional({ example: 'jwt-secret' })
   @IsOptional()
   @IsString()

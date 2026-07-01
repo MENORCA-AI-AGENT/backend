@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { validateEnvironment } from './shared/config/validate-environment';
 import { HealthModule } from './modules/health/health.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 /**
  * Root module for the monolithic Menorca travel agent backend.
@@ -18,6 +19,7 @@ import { HealthModule } from './modules/health/health.module';
       isGlobal: true,
       validate: validateEnvironment,
     }),
+    AuthModule,
     HealthModule,
   ],
   controllers: [AppController],

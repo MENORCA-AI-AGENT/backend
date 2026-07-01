@@ -11,6 +11,8 @@ import { Role } from './role.enum';
 export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
+    email?: string;
     roles: Role[];
+    provider?: string;
   };
 }
