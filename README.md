@@ -55,6 +55,37 @@ infrastructure  Supabase, Stripe, Milvus y clientes externos
 presentation    Controllers y DTOs HTTP
 ```
 
+## Documentacion tecnica
+
+La documentacion viva del backend esta en:
+
+```txt
+docs/architecture.md
+docs/api.md
+docs/decisions.md
+docs/conventions.md
+```
+
+Estos archivos describen arquitectura, tecnologias, endpoints, DTOs, servicios,
+decisiones, convenciones y mejoras futuras.
+
+El estado operativo de tareas se mantiene en:
+
+```txt
+tasks/current.md
+tasks/backlog.md
+```
+
+El contexto persistente para agentes de IA se mantiene en:
+
+```txt
+.ai/project.md
+.ai/rules.md
+.ai/context.md
+.ai/commands.md
+.ai/stack.md
+```
+
 ## DTOs
 
 Todos los DTOs deben usar `class-validator` para expresar reglas de validacion
